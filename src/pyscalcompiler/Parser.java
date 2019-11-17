@@ -20,7 +20,7 @@ public class Parser {
 				"[Erro Sintatico] na linha " + this.token.getLinha() + " e coluna " + this.token.getColuna() + ": ");
 		System.out.println(message);
 	}
-
+	
 	public void advance() {
 		System.out.println("[DEBUG] token:" + this.token.toString());
 		this.token = this.lexer.nextToken();
@@ -162,8 +162,7 @@ public class Parser {
 			Cmd();
 			ListaCmdLinha();
 		} else if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.KW_END)
-				|| token.getCodigo().equals(Tag.KW_RETURN)) {
-			sinalizaErroSintatico("Esperado \"ID, if, while, write\"; encontrado \"" + this.token.getLexema() + "\"");
+				|| token.getCodigo().equals(Tag.KW_RETURN)) {			
 			return;
 		} else {
 			skip("Esperado \"ID, if, while, write\"; encontrado \"" + this.token.getLexema() + "\"");
@@ -403,6 +402,7 @@ public class Parser {
 			if (!eat(Tag.KW_DOISPONTOS))
 				sinalizaErroSintatico("Esperado \":\"; encontrado \"" + this.token.getLexema() + "\"");
 			RegexDeclaraID();
+			ListaCmd();
 			Retorno();
 			if (!eat(Tag.KW_END))
 				sinalizaErroSintatico("Esperado \"end\"; encontrado \"" + this.token.getLexema() + "\"");
@@ -455,13 +455,15 @@ public class Parser {
 	public void Expressao() {
 		if (token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_ABREPAR)
 				|| token.getCodigo().equals(Tag.KW_VIRGULA) || token.getCodigo().equals(Tag.OP_OR)
-				|| token.getCodigo().equals(Tag.OP_AND)) {
+				|| token.getCodigo().equals(Tag.OP_AND)|| token.getCodigo().equals(Tag.ID) 
+				|| token.getCodigo().equals(Tag.KW_TRUE)|| token.getCodigo().equals(Tag.KW_FALSE)
+				|| token.getCodigo().equals(Tag.KW_STRING) || token.getCodigo().equals(Tag.NUM)) {
 			Exp1();
 			ExpLinha();
 		} else {
 			// synch Expressao
-			if (token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_ABREPAR)
-					|| token.getCodigo().equals(Tag.KW_VIRGULA)) {
+			if (token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_FECHAPAR) 
+				|| token.getCodigo().equals(Tag.KW_VIRGULA)) {
 				sinalizaErroSintatico("Esperado \";, (, or, and, ,\"; encontrado \"" + this.token.getLexema() + "\"");
 				return;
 			} else {
@@ -476,8 +478,8 @@ public class Parser {
 		if (eat(Tag.OP_OR) || eat(Tag.OP_AND)) {
 			Exp1();
 			ExpLinha();
-		} else if (token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_PONTOVIRGULA)
-				|| token.getCodigo().equals(Tag.KW_VIRGULA)) {
+		} else if (token.getCodigo().equals(Tag.KW_FECHAPAR) 
+				   || token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
 			return;
 		} else {
 			skip("Esperado \"or, and\"; " + "encontrado \"" + this.token.getLexema() + "\"");
@@ -490,14 +492,14 @@ public class Parser {
 		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.NUM)
 				|| token.getCodigo().equals(Tag.KW_TRUE) || token.getCodigo().equals(Tag.KW_FALSE)
 				|| token.getCodigo().equals(Tag.OP_NEGATIVO) || token.getCodigo().equals(Tag.OP_NEGACAO)
-				|| token.getCodigo().equals(Tag.KW_ABREPAR)) {
+				|| token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_STRING)) {
 			Exp2();
 			Exp1Linha();
 		} else {
 			// synch Exp1
 			if (token.getCodigo().equals(Tag.OP_OR) || token.getCodigo().equals(Tag.OP_AND)
-					|| token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_PONTOVIRGULA)
-					|| token.getCodigo().equals(Tag.KW_VIRGULA)) {
+					|| token.getCodigo().equals(Tag.KW_FECHAPAR)
+					|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
 				sinalizaErroSintatico("Esperado \"ID, ConstInteger, ConstDouble, ConstString, true, false, -, !, (\"; "
 						+ "encontrado \"" + this.token.getLexema() + "\"");
 				return;
@@ -516,8 +518,8 @@ public class Parser {
 			Exp2();
 			Exp1Linha();
 		} else if (token.getCodigo().equals(Tag.OP_OR) || token.getCodigo().equals(Tag.OP_AND)
-				|| token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_PONTOVIRGULA)
-				|| token.getCodigo().equals(Tag.KW_VIRGULA)) {
+				|| token.getCodigo().equals(Tag.KW_FECHAPAR)
+				|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
 			return;
 		} else {
 			skip("Esperado \"<, <=, >, >=, ==, !=\"; " + "encontrado \"" + this.token.getLexema() + "\"");
@@ -530,7 +532,7 @@ public class Parser {
 		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.NUM)
 				|| token.getCodigo().equals(Tag.KW_TRUE) || token.getCodigo().equals(Tag.KW_FALSE)
 				|| token.getCodigo().equals(Tag.OP_NEGATIVO) || token.getCodigo().equals(Tag.OP_NEGACAO)
-				|| token.getCodigo().equals(Tag.KW_ABREPAR)) {
+				|| token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_STRING)) {
 			Exp3();
 			Exp2Linha();
 		} else {
@@ -539,8 +541,8 @@ public class Parser {
 					|| token.getCodigo().equals(Tag.OP_MAIOR) || token.getCodigo().equals(Tag.OP_MAIOR_IGUAL)
 					|| token.getCodigo().equals(Tag.OP_IGUAL) || token.getCodigo().equals(Tag.OP_DIFERENTE)
 					|| token.getCodigo().equals(Tag.OP_OR) || token.getCodigo().equals(Tag.OP_AND)
-					|| token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_PONTOVIRGULA)
-					|| token.getCodigo().equals(Tag.KW_VIRGULA)) {
+					|| token.getCodigo().equals(Tag.KW_FECHAPAR) 
+					|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
 				sinalizaErroSintatico("Esperado \"ID, ConstInteger, ConstDouble, ConstString, true, false, -, !, (\"; "
 						+ "encontrado \"" + this.token.getLexema() + "\"");
 				return;
@@ -561,8 +563,8 @@ public class Parser {
 				|| token.getCodigo().equals(Tag.OP_MAIOR) || token.getCodigo().equals(Tag.OP_MAIOR_IGUAL)
 				|| token.getCodigo().equals(Tag.OP_IGUAL) || token.getCodigo().equals(Tag.OP_DIFERENTE)
 				|| token.getCodigo().equals(Tag.OP_OR) || token.getCodigo().equals(Tag.OP_AND)
-				|| token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_PONTOVIRGULA)
-				|| token.getCodigo().equals(Tag.KW_VIRGULA)) {
+				|| token.getCodigo().equals(Tag.KW_FECHAPAR) 
+				|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
 			return;
 		} else {
 			skip("Esperado \"+, -\"; " + "encontrado \"" + this.token.getLexema() + "\"");
@@ -575,7 +577,7 @@ public class Parser {
 		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.NUM)
 				|| token.getCodigo().equals(Tag.KW_TRUE) || token.getCodigo().equals(Tag.KW_FALSE)
 				|| token.getCodigo().equals(Tag.OP_NEGATIVO) || token.getCodigo().equals(Tag.OP_NEGACAO)
-				|| token.getCodigo().equals(Tag.KW_ABREPAR)) {
+				|| token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_STRING)) {
 			Exp4();
 			Exp3Linha();
 		} else {
@@ -585,8 +587,8 @@ public class Parser {
 					|| token.getCodigo().equals(Tag.OP_MAIOR) || token.getCodigo().equals(Tag.OP_MAIOR_IGUAL)
 					|| token.getCodigo().equals(Tag.OP_IGUAL) || token.getCodigo().equals(Tag.OP_DIFERENTE)
 					|| token.getCodigo().equals(Tag.OP_OR) || token.getCodigo().equals(Tag.OP_AND)
-					|| token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_PONTOVIRGULA)
-					|| token.getCodigo().equals(Tag.KW_VIRGULA)) {
+					|| token.getCodigo().equals(Tag.KW_FECHAPAR) 
+					|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
 				sinalizaErroSintatico("Esperado \"ID, ConstInteger, ConstDouble, ConstString, true, false, -, !, (\"; "
 						+ "encontrado \"" + this.token.getLexema() + "\"");
 				return;
@@ -608,8 +610,8 @@ public class Parser {
 				|| token.getCodigo().equals(Tag.OP_MAIOR) || token.getCodigo().equals(Tag.OP_MAIOR_IGUAL)
 				|| token.getCodigo().equals(Tag.OP_IGUAL) || token.getCodigo().equals(Tag.OP_DIFERENTE)
 				|| token.getCodigo().equals(Tag.OP_OR) || token.getCodigo().equals(Tag.OP_AND)
-				|| token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_PONTOVIRGULA)
-				|| token.getCodigo().equals(Tag.KW_VIRGULA)) {
+				|| token.getCodigo().equals(Tag.KW_FECHAPAR) 
+				|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
 			return;
 		} else {
 			skip("Esperado \"*, /\"; " + "encontrado \"" + this.token.getLexema() + "\"");
@@ -628,7 +630,7 @@ public class Parser {
 			Expressao();
 			if (!eat(Tag.KW_FECHAPAR))
 				sinalizaErroSintatico("Esperado \")\"; " + "encontrado \"" + this.token.getLexema() + "\"");
-		} else if (eat(Tag.KW_TRUE) || eat(Tag.KW_FALSE) || eat(Tag.NUM)) {
+		} else if (eat(Tag.KW_TRUE) || eat(Tag.KW_FALSE) || eat(Tag.NUM) || eat(Tag.KW_STRING)) {
 			return;
 		} else {
 			// synch Exp4
@@ -638,8 +640,8 @@ public class Parser {
 					|| token.getCodigo().equals(Tag.OP_MAIOR) || token.getCodigo().equals(Tag.OP_MAIOR_IGUAL)
 					|| token.getCodigo().equals(Tag.OP_IGUAL) || token.getCodigo().equals(Tag.OP_DIFERENTE)
 					|| token.getCodigo().equals(Tag.OP_OR) || token.getCodigo().equals(Tag.OP_AND)
-					|| token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_PONTOVIRGULA)
-					|| token.getCodigo().equals(Tag.KW_VIRGULA)) {
+					|| token.getCodigo().equals(Tag.KW_FECHAPAR)
+					|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
 				sinalizaErroSintatico("Esperado \"ID, ConstInteger, ConstDouble, ConstString, true, false, -, !, (\"; "
 						+ "encontrado \"" + this.token.getLexema() + "\"");
 				return;
@@ -655,14 +657,16 @@ public class Parser {
 	public void Exp4Linha() {
 		if (eat(Tag.KW_ABREPAR)) {
 			RegexExp();
+			if (!eat(Tag.KW_FECHAPAR))
+                sinalizaErroSintatico("Esperado \")\"; " + "encontrado \"" + this.token.getLexema() + "\"");
 		} else if (token.getCodigo().equals(Tag.OP_MULTIPLICAO) || token.getCodigo().equals(Tag.OP_DIVISAO)
 				|| token.getCodigo().equals(Tag.OP_SOMA) || token.getCodigo().equals(Tag.OP_SUBTRACAO)
 				|| token.getCodigo().equals(Tag.OP_MENOR) || token.getCodigo().equals(Tag.OP_MENOR_IGUAL)
 				|| token.getCodigo().equals(Tag.OP_MAIOR) || token.getCodigo().equals(Tag.OP_MAIOR_IGUAL)
 				|| token.getCodigo().equals(Tag.OP_IGUAL) || token.getCodigo().equals(Tag.OP_DIFERENTE)
 				|| token.getCodigo().equals(Tag.OP_OR) || token.getCodigo().equals(Tag.OP_AND)
-				|| token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_PONTOVIRGULA)
-				|| token.getCodigo().equals(Tag.KW_VIRGULA)) {
+				|| token.getCodigo().equals(Tag.KW_FECHAPAR) 
+				|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
 			return;
 		} else {
 			skip("Esperado \"ID, ConstInteger, ConstDouble, ConstString, true, false, -, !, (\"; " + "encontrado \""
