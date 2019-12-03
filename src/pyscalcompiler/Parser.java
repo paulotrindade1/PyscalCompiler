@@ -142,7 +142,7 @@ public class Parser {
 			ListaCmdLinha();
 		} else {
 			// synch ListaCmd
-			if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.KW_END)
+			if (token.getCodigo().equals(Tag.ELSE) || token.getCodigo().equals(Tag.KW_END)
 					|| token.getCodigo().equals(Tag.KW_RETURN)) {
 				sinalizaErroSintatico("Esperado \"ID, end, return, if, else, while, write\"; encontrado \""
 						+ this.token.getLexema() + "\"");
@@ -157,7 +157,7 @@ public class Parser {
 	}
 
 	public void ListaCmdLinha() {
-		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.KW_IF)
+		if (token.getCodigo().equals(Tag.ELSE) || token.getCodigo().equals(Tag.KW_IF)
 				|| token.getCodigo().equals(Tag.KW_WHILE) || token.getCodigo().equals(Tag.KW_WRITE)) {
 			Cmd();
 			ListaCmdLinha();
