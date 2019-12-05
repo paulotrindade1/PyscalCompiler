@@ -5,6 +5,7 @@ public class Parser {
 	private Lexer lexer;
 	private Token token;
 	public String message;
+	private Token auxToken;
 
 	public Parser(Lexer lexer) {
 		this.lexer = lexer;
@@ -52,7 +53,7 @@ public class Parser {
 	}
 
 	public void Classe() {
-		if (eat(Tag.KW_CLASS)) {
+		if (eat(Tag.KW_CLASS)) {			
 			ID();
 			if (!eat(Tag.KW_DOISPONTOS))
 				sinalizaErroSintatico("Esperado \":\"; encontrado \"" + this.token.getLexema() + "\"");
@@ -75,9 +76,14 @@ public class Parser {
 		}
 	}
 
-	public void ID() {
+	public No ID() {
+		auxToken = new Token(token.getCodigo(), token.getLexema(), token.getLinha(), token.getColuna());
 		if (!eat(Tag.ID))
 			sinalizaErroSintatico("Esperado \"ID\"; encontrado \"" + this.token.getLexema() + "\"");
+		else
+			return new No();
+						 
+		return new No();
 	}
 
 	public void ListaFuncao() {
@@ -453,11 +459,11 @@ public class Parser {
 	}
 
 	public void Expressao() {
-		if (token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_ABREPAR)
-				|| token.getCodigo().equals(Tag.KW_VIRGULA) || token.getCodigo().equals(Tag.OP_OR)
-				|| token.getCodigo().equals(Tag.OP_AND)|| token.getCodigo().equals(Tag.ID) 
-				|| token.getCodigo().equals(Tag.KW_TRUE)|| token.getCodigo().equals(Tag.KW_FALSE)
-				|| token.getCodigo().equals(Tag.KW_STRING) || token.getCodigo().equals(Tag.NUM)) {
+		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.NUM) 
+			|| token.getCodigo().equals(Tag.KW_STRING)
+			|| token.getCodigo().equals(Tag.KW_TRUE)|| token.getCodigo().equals(Tag.KW_FALSE)
+			|| token.getCodigo().equals(Tag.OP_NEGATIVO) || token.getCodigo().equals(Tag.OP_NEGACAO)
+			|| token.getCodigo().equals(Tag.KW_ABREPAR)) {
 			Exp1();
 			ExpLinha();
 		} else {
@@ -489,10 +495,11 @@ public class Parser {
 	}
 
 	public void Exp1() {
-		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.NUM)
-				|| token.getCodigo().equals(Tag.KW_TRUE) || token.getCodigo().equals(Tag.KW_FALSE)
+		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.NUM) 
+				|| token.getCodigo().equals(Tag.KW_STRING)
+				|| token.getCodigo().equals(Tag.KW_TRUE)|| token.getCodigo().equals(Tag.KW_FALSE)
 				|| token.getCodigo().equals(Tag.OP_NEGATIVO) || token.getCodigo().equals(Tag.OP_NEGACAO)
-				|| token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_STRING)) {
+				|| token.getCodigo().equals(Tag.KW_ABREPAR)) {
 			Exp2();
 			Exp1Linha();
 		} else {
@@ -529,10 +536,11 @@ public class Parser {
 	}
 
 	public void Exp2() {
-		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.NUM)
-				|| token.getCodigo().equals(Tag.KW_TRUE) || token.getCodigo().equals(Tag.KW_FALSE)
+		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.NUM) 
+				|| token.getCodigo().equals(Tag.KW_STRING)
+				|| token.getCodigo().equals(Tag.KW_TRUE)|| token.getCodigo().equals(Tag.KW_FALSE)
 				|| token.getCodigo().equals(Tag.OP_NEGATIVO) || token.getCodigo().equals(Tag.OP_NEGACAO)
-				|| token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_STRING)) {
+				|| token.getCodigo().equals(Tag.KW_ABREPAR)) {
 			Exp3();
 			Exp2Linha();
 		} else {
@@ -574,10 +582,11 @@ public class Parser {
 	}
 
 	public void Exp3() {
-		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.NUM)
-				|| token.getCodigo().equals(Tag.KW_TRUE) || token.getCodigo().equals(Tag.KW_FALSE)
+		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.NUM) 
+				|| token.getCodigo().equals(Tag.KW_STRING)
+				|| token.getCodigo().equals(Tag.KW_TRUE)|| token.getCodigo().equals(Tag.KW_FALSE)
 				|| token.getCodigo().equals(Tag.OP_NEGATIVO) || token.getCodigo().equals(Tag.OP_NEGACAO)
-				|| token.getCodigo().equals(Tag.KW_ABREPAR) || token.getCodigo().equals(Tag.KW_STRING)) {
+				|| token.getCodigo().equals(Tag.KW_ABREPAR)) {
 			Exp4();
 			Exp3Linha();
 		} else {

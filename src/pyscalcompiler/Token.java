@@ -2,10 +2,10 @@ package pyscalcompiler;
 
 public class Token {
 
-    String codigo;
-    String lexema;
-    int linha;
-    int coluna;
+    private String codigo;
+    private String lexema;
+    private int linha;
+    private int coluna;
 
     public Token(String codigo, String lexema, int linha, int coluna) {
         this.codigo = codigo;

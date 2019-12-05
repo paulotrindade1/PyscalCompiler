@@ -4,9 +4,9 @@ public class Main {
 
     public static void main(String[] args) {
         //String fileName = "Pyscal.txt";
-        String fileName = "PyscalTest.txt";        
-        //String fileName = "HelloWorld.txt";
-        //String fileName = "HelloWorldErro.txt";
+        //String fileName = "PyscalTest.txt"; 
+        String fileName = "TestePaulo.txt";
+
 
         Lexer lexer = new Lexer(fileName);
         Parser parser = new Parser(lexer);

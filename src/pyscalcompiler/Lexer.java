@@ -71,7 +71,7 @@ public class Lexer {
         if (this.ts.getToken(lexema) == null) {
             ts.addToken(lexema, token);
         } else {
-            token.setCodigo(this.ts.getToken(lexema).codigo);
+            token.setCodigo(this.ts.getToken(lexema).getCodigo());
         }
 
         lastToken = token;
@@ -299,7 +299,6 @@ public class Lexer {
                     } else {
                         lexema += c;
                     }
-
             }
         }
     }
