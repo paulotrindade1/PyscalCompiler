@@ -6,6 +6,7 @@ public class Parser {
 	private Token token;
 	public String message;
 	private Token auxToken;
+	private Ts ts = new Ts();
 
 	public Parser(Lexer lexer) {
 		this.lexer = lexer;
@@ -54,7 +55,7 @@ public class Parser {
 
 	public void Classe() {
 		if (eat(Tag.KW_CLASS)) {			
-			ID();
+			ID(null);
 			if (!eat(Tag.KW_DOISPONTOS))
 				sinalizaErroSintatico("Esperado \":\"; encontrado \"" + this.token.getLexema() + "\"");
 			ListaFuncao();
@@ -76,14 +77,12 @@ public class Parser {
 		}
 	}
 
-	public No ID() {
-		auxToken = new Token(token.getCodigo(), token.getLexema(), token.getLinha(), token.getColuna());
+	public void ID(No no) {
+		this.auxToken = new Token(token.getCodigo(), token.getLexema(), token.getLinha(), token.getColuna());
 		if (!eat(Tag.ID))
 			sinalizaErroSintatico("Esperado \"ID\"; encontrado \"" + this.token.getLexema() + "\"");
 		else
-			return new No();
-						 
-		return new No();
+			;//TODO: alguma merda q eu nao consigo						
 	}
 
 	public void ListaFuncao() {
@@ -104,6 +103,7 @@ public class Parser {
 
 	public void Main() {
 		if (eat(Tag.KW_DEFSTATIC)) {
+			this.auxToken = new Token(token.getCodigo(), token.getLexema(), token.getLinha(), token.getColuna());
 			if (!eat(Tag.KW_VOID))
 				sinalizaErroSintatico("Esperado \"void\"; encontrado \"" + this.token.getLexema() + "\"");
 			if (!eat(Tag.KW_MAIN))
@@ -116,7 +116,7 @@ public class Parser {
 				sinalizaErroSintatico("Esperado \"[\"; encontrado \"" + this.token.getLexema() + "\"");
 			if (!eat(Tag.KW_FECHACOL))
 				sinalizaErroSintatico("Esperado \"]\"; encontrado \"" + this.token.getLexema() + "\"");
-			ID();
+			ID(null);
 			if (!eat(Tag.KW_FECHAPAR))
 				sinalizaErroSintatico("Esperado \")\"; encontrado \"" + this.token.getLexema() + "\"");
 			if (!eat(Tag.KW_DOISPONTOS))
@@ -148,7 +148,7 @@ public class Parser {
 			ListaCmdLinha();
 		} else {
 			// synch ListaCmd
-			if (token.getCodigo().equals(Tag.ELSE) || token.getCodigo().equals(Tag.KW_END)
+			if (token.getCodigo().equals(Tag.KW_ELSE) || token.getCodigo().equals(Tag.KW_END)
 					|| token.getCodigo().equals(Tag.KW_RETURN)) {
 				sinalizaErroSintatico("Esperado \"ID, end, return, if, else, while, write\"; encontrado \""
 						+ this.token.getLexema() + "\"");
@@ -163,7 +163,7 @@ public class Parser {
 	}
 
 	public void ListaCmdLinha() {
-		if (token.getCodigo().equals(Tag.ELSE) || token.getCodigo().equals(Tag.KW_IF)
+		if (token.getCodigo().equals(Tag.KW_ELSE) || token.getCodigo().equals(Tag.KW_IF)
 				|| token.getCodigo().equals(Tag.KW_WHILE) || token.getCodigo().equals(Tag.KW_WRITE)) {
 			Cmd();
 			ListaCmdLinha();
@@ -178,12 +178,13 @@ public class Parser {
 	}
 
 	public void Cmd() {
+		this.auxToken = new Token(token.getCodigo(), token.getLexema(), token.getLinha(), token.getColuna());
 		if (token.getCodigo().equals(Tag.KW_IF)) {
 			CmdIf();
 		} else if (token.getCodigo().equals(Tag.KW_WHILE)) {
 			CmdWhile();
 		} else if (token.getCodigo().equals(Tag.ID)) {
-			ID();
+			ID(null);
 			CmdAtribFunc();
 		} else if (token.getCodigo().equals(Tag.KW_WRITE)) {
 			CmdWrite();
@@ -208,7 +209,7 @@ public class Parser {
 		if (eat(Tag.KW_IF)) {
 			if (!eat(Tag.KW_ABREPAR))
 				sinalizaErroSintatico("Esperado \"(\"; encontrado \"" + this.token.getLexema() + "\"");
-			Expressao();
+			No noExpressao = Expressao();
 			if (!eat(Tag.KW_FECHAPAR))
 				sinalizaErroSintatico("Esperado \")\"; encontrado \"" + this.token.getLexema() + "\"");
 			if (!eat(Tag.KW_DOISPONTOS))
@@ -264,7 +265,7 @@ public class Parser {
 		if (eat(Tag.KW_WHILE)) {
 			if (!eat(Tag.KW_ABREPAR))
 				sinalizaErroSintatico("Esperado \"(\"; encontrado \"" + this.token.getLexema() + "\"");
-			Expressao();
+			No noExpressao = Expressao();
 			if (!eat(Tag.KW_FECHAPAR))
 				sinalizaErroSintatico("Esperado \")\"; encontrado \"" + this.token.getLexema() + "\"");
 			if (!eat(Tag.KW_DOISPONTOS))
@@ -295,7 +296,7 @@ public class Parser {
 		if (eat(Tag.KW_WRITE)) {
 			if (!eat(Tag.KW_ABREPAR))
 				sinalizaErroSintatico("Esperado \"(\"; encontrado \"" + this.token.getLexema() + "\"");
-			Expressao();
+			No noExpressao = Expressao();
 			if (!eat(Tag.KW_FECHAPAR))
 				sinalizaErroSintatico("Esperado \")\"; encontrado \"" + this.token.getLexema() + "\"");
 			if (!eat(Tag.KW_PONTOVIRGULA))
@@ -339,11 +340,19 @@ public class Parser {
 		}
 	}
 
-	public void CmdAtribui() {
+	public No CmdAtribui() {
+		No noCmdAtribui = new No();
+		
 		if (eat(Tag.KW_ATTRIB)) {
-			Expressao();
+			No noExpressao = Expressao();
 			if (!eat(Tag.KW_PONTOVIRGULA))
 				sinalizaErroSintatico("Esperado \";\"; encontrado \"" + this.token.getLexema() + "\"");
+			else {
+				noCmdAtribui.setTipo(noExpressao.getTipo());
+				return noCmdAtribui;
+			}
+				
+			
 		} else {
 			// synch CmdAtribui
 			if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.KW_IF)
@@ -351,13 +360,14 @@ public class Parser {
 					|| token.getCodigo().equals(Tag.KW_RETURN) || token.getCodigo().equals(Tag.KW_END)
 					|| token.getCodigo().equals(Tag.KW_ELSE)) {
 				sinalizaErroSintatico("Esperado \"=\"; encontrado \"" + this.token.getLexema() + "\"");
-				return;
+				return noCmdAtribui;
 			} else {
 				skip("Esperado \"=\"; encontrado \"" + this.token.getLexema() + "\"");
 				if (!token.getCodigo().equals(Tag.EOF))
 					CmdAtribui();
 			}
 		}
+		return new No();
 	}
 
 	public void CmdFuncao() {
@@ -398,8 +408,8 @@ public class Parser {
 
 	public void Funcao() {
 		if (eat(Tag.KW_DEF)) {
-			TipoPrimitivo();
-			ID();
+			No noTipoPrimitivo = TipoPrimitivo();
+			ID(noTipoPrimitivo);
 			if (!eat(Tag.KW_ABREPAR))
 				sinalizaErroSintatico("Esperado \"(\"; encontrado \"" + this.token.getLexema() + "\"");
 			ListaArg();
@@ -409,7 +419,7 @@ public class Parser {
 				sinalizaErroSintatico("Esperado \":\"; encontrado \"" + this.token.getLexema() + "\"");
 			RegexDeclaraID();
 			ListaCmd();
-			Retorno();
+			No noRetorno = Retorno();
 			if (!eat(Tag.KW_END))
 				sinalizaErroSintatico("Esperado \"end\"; encontrado \"" + this.token.getLexema() + "\"");
 			if (!eat(Tag.KW_PONTOVIRGULA))
@@ -444,64 +454,102 @@ public class Parser {
 		}
 	}
 
-	public void Retorno() {
+	public No Retorno() {
+		No noRetorno = new No();
 		if (eat(Tag.KW_RETURN)) {
-			Expressao();
+			No noExpressao = Expressao();
 			if (!eat(Tag.KW_PONTOVIRGULA))
 				sinalizaErroSintatico("Esperado \";\"; encontrado \"" + this.token.getLexema() + "\"");
+			else {
+				noRetorno.setTipo(noExpressao.getTipo());
+				return noRetorno;
+			}
 		} else if (token.getCodigo().equals(Tag.KW_END)) {
-			return;
+			noRetorno.setTipo(Tag.VAZIO);
+			return noRetorno;
 		} else {
 			skip("Esperado \"return\"; encontrado \"" + this.token.getLexema() + "\"");
 			if (!token.getCodigo().equals(Tag.EOF))
 				Retorno();
 		}
+		return new No();
 	}
 
-	public void Expressao() {
+	public No Expressao() {
+		No noExpressao = new No();
 		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.NUM) 
 			|| token.getCodigo().equals(Tag.KW_STRING)
 			|| token.getCodigo().equals(Tag.KW_TRUE)|| token.getCodigo().equals(Tag.KW_FALSE)
 			|| token.getCodigo().equals(Tag.OP_NEGATIVO) || token.getCodigo().equals(Tag.OP_NEGACAO)
 			|| token.getCodigo().equals(Tag.KW_ABREPAR)) {
-			Exp1();
-			ExpLinha();
+			No noExp1 = Exp1();
+			No noExpLinha = ExpLinha();
+			
+			if(noExpLinha.getTipo().equals(Tag.VAZIO))
+				noExpressao.setTipo(noExp1.getTipo());
+			else if (noExpLinha.getTipo().equals(noExp1.getTipo()) && noExpLinha.getTipo().equals(Tag.LOGICO))
+				noExpressao.setTipo(Tag.LOGICO);
+			else
+				noExpressao.setTipo(Tag.ERRO);
+			
 		} else {
 			// synch Expressao
 			if (token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_FECHAPAR) 
 				|| token.getCodigo().equals(Tag.KW_VIRGULA)) {
 				sinalizaErroSintatico("Esperado \";, (, or, and, ,\"; encontrado \"" + this.token.getLexema() + "\"");
-				return;
+				return new No();
 			} else {
 				skip("Esperado \";, (, or, and, ,\"; encontrado \"" + this.token.getLexema() + "\"");
 				if (!token.getCodigo().equals(Tag.EOF))
 					Expressao();
 			}
 		}
+		return noExpressao;
 	}
 
-	public void ExpLinha() {
+	public No ExpLinha() {
+		No noExpLinha = new No();
 		if (eat(Tag.OP_OR) || eat(Tag.OP_AND)) {
-			Exp1();
-			ExpLinha();
+			No noExp1 = Exp1();
+			No noExpLinhaFilho = ExpLinha();
+			
+			if (noExpLinhaFilho.getTipo().equals(Tag.VAZIO))
+				noExpLinha.setTipo(noExp1.getTipo());
+			else if (noExpLinhaFilho.getTipo().equals(noExp1.getTipo()) && noExpLinhaFilho.getTipo().equals(Tag.LOGICO))
+				noExpLinha.setTipo(Tag.LOGICO);
+			else
+				noExpLinha.setTipo(Tag.ERRO);
+			return noExpLinha;
+			
 		} else if (token.getCodigo().equals(Tag.KW_FECHAPAR) 
 				   || token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
-			return;
+			noExpLinha.setTipo(Tag.VAZIO);
+			return noExpLinha;
 		} else {
 			skip("Esperado \"or, and\"; " + "encontrado \"" + this.token.getLexema() + "\"");
 			if (!token.getCodigo().equals(Tag.EOF))
 				ExpLinha();
 		}
+		return noExpLinha;
 	}
 
-	public void Exp1() {
+	public No Exp1() {
+		No noExp1 = new No();
 		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.NUM) 
 				|| token.getCodigo().equals(Tag.KW_STRING)
 				|| token.getCodigo().equals(Tag.KW_TRUE)|| token.getCodigo().equals(Tag.KW_FALSE)
 				|| token.getCodigo().equals(Tag.OP_NEGATIVO) || token.getCodigo().equals(Tag.OP_NEGACAO)
 				|| token.getCodigo().equals(Tag.KW_ABREPAR)) {
-			Exp2();
-			Exp1Linha();
+			No noExp2 = Exp2();
+			No noExp1Linha = Exp1Linha();
+			
+			if (noExp1Linha.getTipo().equals(Tag.VAZIO))
+				noExp1.setTipo(noExp2.getTipo());
+			else if (noExp1Linha.getTipo().equals(noExp2.getTipo()) && noExp1Linha.getTipo().equals(Tag.NUMERICO))
+				noExp1.setTipo(Tag.LOGICO);
+			else
+				noExp1.setTipo(Tag.ERRO);
+			
 		} else {
 			// synch Exp1
 			if (token.getCodigo().equals(Tag.OP_OR) || token.getCodigo().equals(Tag.OP_AND)
@@ -509,7 +557,7 @@ public class Parser {
 					|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
 				sinalizaErroSintatico("Esperado \"ID, ConstInteger, ConstDouble, ConstString, true, false, -, !, (\"; "
 						+ "encontrado \"" + this.token.getLexema() + "\"");
-				return;
+				return noExp1;
 			} else {
 				skip("Esperado \"ID, ConstInteger, ConstDouble, ConstString, true, false, -, !, (\"; " + "encontrado \""
 						+ this.token.getLexema() + "\"");
@@ -517,32 +565,57 @@ public class Parser {
 					Exp1();
 			}
 		}
+		return noExp1;
 	}
 
-	public void Exp1Linha() {
+	public No Exp1Linha() {
+		No noExp1Linha = new No();
 		if (eat(Tag.OP_MENOR) || eat(Tag.OP_MENOR_IGUAL) || eat(Tag.OP_MAIOR) || eat(Tag.OP_MAIOR_IGUAL)
 				|| eat(Tag.OP_IGUAL) || eat(Tag.OP_DIFERENTE)) {
-			Exp2();
-			Exp1Linha();
+			No noExp2 = Exp2();
+			No noExp1LinhaFilho = Exp1Linha();
+			
+			if (noExp1LinhaFilho.getTipo().equals(Tag.VAZIO) && noExp2.getTipo().equals(Tag.NUMERICO))
+				noExp1Linha.setTipo(Tag.NUMERICO);
+			else if (noExp1LinhaFilho.getTipo().equals(noExp2.getTipo()) && noExp2.getTipo().equals(Tag.NUMERICO))
+				noExp1Linha.setTipo(Tag.NUMERICO);
+			else
+				noExp1Linha.setTipo(Tag.ERRO);
+			
+			return noExp1Linha;
+			
 		} else if (token.getCodigo().equals(Tag.OP_OR) || token.getCodigo().equals(Tag.OP_AND)
 				|| token.getCodigo().equals(Tag.KW_FECHAPAR)
 				|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
-			return;
+			noExp1Linha.setTipo(Tag.VAZIO);
+			return noExp1Linha;
 		} else {
 			skip("Esperado \"<, <=, >, >=, ==, !=\"; " + "encontrado \"" + this.token.getLexema() + "\"");
 			if (!token.getCodigo().equals(Tag.EOF))
 				Exp1Linha();
 		}
+		return noExp1Linha;
 	}
 
-	public void Exp2() {
+	public No Exp2() {
+		No noExp2 = new No();
 		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.NUM) 
 				|| token.getCodigo().equals(Tag.KW_STRING)
 				|| token.getCodigo().equals(Tag.KW_TRUE)|| token.getCodigo().equals(Tag.KW_FALSE)
 				|| token.getCodigo().equals(Tag.OP_NEGATIVO) || token.getCodigo().equals(Tag.OP_NEGACAO)
 				|| token.getCodigo().equals(Tag.KW_ABREPAR)) {
-			Exp3();
-			Exp2Linha();
+			No noExp3 = Exp3();
+			No noExp2Linha = Exp2Linha();
+			
+			if (noExp2Linha.getTipo().equals(Tag.VAZIO))
+				noExp2.setTipo(noExp3.getTipo());
+			else if (noExp2Linha.getTipo().equals(noExp3.getTipo()) && noExp2Linha.getTipo().equals(Tag.NUMERICO))
+				noExp2.setTipo(Tag.NUMERICO);
+			else 
+				noExp2.setTipo(Tag.ERRO);
+			
+			return noExp2;
+			
 		} else {
 			// synch Exp2
 			if (token.getCodigo().equals(Tag.OP_MENOR) || token.getCodigo().equals(Tag.OP_MENOR_IGUAL)
@@ -553,7 +626,7 @@ public class Parser {
 					|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
 				sinalizaErroSintatico("Esperado \"ID, ConstInteger, ConstDouble, ConstString, true, false, -, !, (\"; "
 						+ "encontrado \"" + this.token.getLexema() + "\"");
-				return;
+				return noExp2;
 			} else {
 				skip("Esperado \"ID, ConstInteger, ConstDouble, ConstString, true, false, -, !, (\"; " + "encontrado \""
 						+ this.token.getLexema() + "\"");
@@ -561,34 +634,59 @@ public class Parser {
 					Exp2();
 			}
 		}
+		return noExp2;
 	}
 
-	public void Exp2Linha() {
+	public No Exp2Linha() {
+		No noExp2Linha = new No();
 		if (eat(Tag.OP_SOMA) || eat(Tag.OP_SUBTRACAO)) {
-			Exp3();
-			Exp2Linha();
+			No noExp3 = Exp3();
+			No noExp2LinhaFilho = Exp2Linha();
+			
+			if (noExp2LinhaFilho.getTipo().equals(Tag.VAZIO) && noExp3.getTipo().equals(Tag.NUMERICO))
+				noExp2Linha.setTipo(Tag.NUMERICO);
+			else if (noExp2LinhaFilho.getTipo().equals(noExp3.getTipo()) && noExp3.getTipo().equals(Tag.NUMERICO))
+				noExp2Linha.setTipo(Tag.NUMERICO);
+			else
+				noExp2Linha.setTipo(Tag.ERRO);
+			
+			return noExp2Linha;
+			
 		} else if (token.getCodigo().equals(Tag.OP_MENOR) || token.getCodigo().equals(Tag.OP_MENOR_IGUAL)
 				|| token.getCodigo().equals(Tag.OP_MAIOR) || token.getCodigo().equals(Tag.OP_MAIOR_IGUAL)
 				|| token.getCodigo().equals(Tag.OP_IGUAL) || token.getCodigo().equals(Tag.OP_DIFERENTE)
 				|| token.getCodigo().equals(Tag.OP_OR) || token.getCodigo().equals(Tag.OP_AND)
 				|| token.getCodigo().equals(Tag.KW_FECHAPAR) 
 				|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
-			return;
+			noExp2Linha.setTipo(Tag.VAZIO);
+			return noExp2Linha;
 		} else {
 			skip("Esperado \"+, -\"; " + "encontrado \"" + this.token.getLexema() + "\"");
 			if (!token.getCodigo().equals(Tag.EOF))
 				Exp2Linha();
 		}
+		return noExp2Linha;
 	}
 
-	public void Exp3() {
+	public No Exp3() {
+		No noExp3 = new No();
 		if (token.getCodigo().equals(Tag.ID) || token.getCodigo().equals(Tag.NUM) 
 				|| token.getCodigo().equals(Tag.KW_STRING)
 				|| token.getCodigo().equals(Tag.KW_TRUE)|| token.getCodigo().equals(Tag.KW_FALSE)
 				|| token.getCodigo().equals(Tag.OP_NEGATIVO) || token.getCodigo().equals(Tag.OP_NEGACAO)
 				|| token.getCodigo().equals(Tag.KW_ABREPAR)) {
-			Exp4();
-			Exp3Linha();
+			No noExp4 = Exp4();
+			No noExp3Linha = Exp3Linha();
+			
+			if (noExp3Linha.getTipo().equals(Tag.VAZIO))
+				noExp3.setTipo(noExp4.getTipo());
+			else if (noExp3Linha.getTipo().equals(noExp4.getTipo()) && noExp3Linha.getTipo().equals(Tag.NUMERICO))
+				noExp3.setTipo(Tag.NUMERICO);
+			else
+				noExp3.setTipo(Tag.ERRO);
+			
+			return noExp3;
+			
 		} else {
 			// synch Exp3
 			if (token.getCodigo().equals(Tag.OP_SOMA) || token.getCodigo().equals(Tag.OP_SUBTRACAO)
@@ -600,7 +698,7 @@ public class Parser {
 					|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
 				sinalizaErroSintatico("Esperado \"ID, ConstInteger, ConstDouble, ConstString, true, false, -, !, (\"; "
 						+ "encontrado \"" + this.token.getLexema() + "\"");
-				return;
+				return noExp3;
 			} else {
 				skip("Esperado \"ID, ConstInteger, ConstDouble, ConstString, true, false, -, !, (\"; " + "encontrado \""
 						+ this.token.getLexema() + "\"");
@@ -608,12 +706,24 @@ public class Parser {
 					Exp3();
 			}
 		}
+		return noExp3;
 	}
 
-	public void Exp3Linha() {
+	public No Exp3Linha() {
+		No noExp3Linha = new No();
 		if (eat(Tag.OP_MULTIPLICAO) || eat(Tag.OP_DIVISAO)) {
-			Exp4();
-			Exp3Linha();
+			No noExp4 = Exp4();
+			No noExp3LinhaFilho = Exp3Linha();
+			
+			if (noExp3LinhaFilho.getTipo().equals(Tag.VAZIO) && noExp4.getTipo().equals(Tag.NUMERICO))
+				noExp3Linha.setTipo(Tag.NUMERICO);
+			else if(noExp3LinhaFilho.getTipo().equals(noExp4.getTipo()) && noExp4.getTipo().equals(Tag.NUMERICO))
+				noExp3Linha.setTipo(Tag.NUMERICO);
+			else 
+				noExp3Linha.setTipo(Tag.ERRO);
+			
+			return noExp3Linha;
+			
 		} else if (token.getCodigo().equals(Tag.OP_SOMA) || token.getCodigo().equals(Tag.OP_SUBTRACAO)
 				|| token.getCodigo().equals(Tag.OP_MENOR) || token.getCodigo().equals(Tag.OP_MENOR_IGUAL)
 				|| token.getCodigo().equals(Tag.OP_MAIOR) || token.getCodigo().equals(Tag.OP_MAIOR_IGUAL)
@@ -621,26 +731,49 @@ public class Parser {
 				|| token.getCodigo().equals(Tag.OP_OR) || token.getCodigo().equals(Tag.OP_AND)
 				|| token.getCodigo().equals(Tag.KW_FECHAPAR) 
 				|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
-			return;
+			noExp3Linha.setTipo(Tag.VAZIO);
+			return noExp3Linha;
 		} else {
 			skip("Esperado \"*, /\"; " + "encontrado \"" + this.token.getLexema() + "\"");
 			if (!token.getCodigo().equals(Tag.EOF))
 				Exp3Linha();
 		}
+		return noExp3Linha;
 	}
 
-	public void Exp4() {
+	public No Exp4() {
+		No noExp4 = new No();
 		if (token.getCodigo().equals(Tag.ID)) {
-			ID();
+			ID(noExp4);
 			Exp4Linha();
-		} else if (eat(Tag.OP_NEGATIVO) || eat(Tag.OP_NEGACAO)) {
-			Exp4();
+			
+			noExp4.setTipo(auxToken.getLexema());
+			
+			if (noExp4.getTipo() == null) {
+				noExp4.setTipo(Tag.ERRO);
+				//sinaliza erro semantico
+			}
+			
+			return noExp4;				
+			
+		} else if (eat(Tag.OP_NEGATIVO) || eat(Tag.OP_NEGACAO)) {			
+			No noExp4Filho = Exp4();
+			
+			//TODO: tendi saporra nao tomar no cu, na vdd entendi nada mas ak nao deu nao!!!!
+			
 		} else if (eat(Tag.KW_ABREPAR)) {
 			Expressao();
 			if (!eat(Tag.KW_FECHAPAR))
 				sinalizaErroSintatico("Esperado \")\"; " + "encontrado \"" + this.token.getLexema() + "\"");
-		} else if (eat(Tag.KW_TRUE) || eat(Tag.KW_FALSE) || eat(Tag.NUM) || eat(Tag.KW_STRING)) {
-			return;
+		} else if (eat(Tag.KW_TRUE) || eat(Tag.KW_FALSE)) {
+			noExp4.setTipo(Tag.LOGICO);
+		}			
+		else if (eat(Tag.NUM)) {
+			noExp4.setTipo(Tag.NUMERICO);
+			return noExp4;
+		}else if (eat(Tag.KW_STRING)) {
+			noExp4.setTipo(Tag.TEXTO);
+			return noExp4;
 		} else {
 			// synch Exp4
 			if (token.getCodigo().equals(Tag.OP_MULTIPLICAO) || token.getCodigo().equals(Tag.OP_DIVISAO)
@@ -653,7 +786,7 @@ public class Parser {
 					|| token.getCodigo().equals(Tag.KW_PONTOVIRGULA) || token.getCodigo().equals(Tag.KW_VIRGULA)) {
 				sinalizaErroSintatico("Esperado \"ID, ConstInteger, ConstDouble, ConstString, true, false, -, !, (\"; "
 						+ "encontrado \"" + this.token.getLexema() + "\"");
-				return;
+				return noExp4;
 			} else {
 				skip("Esperado \"ID, ConstInteger, ConstDouble, ConstString, true, false, -, !, (\"; " + "encontrado \""
 						+ this.token.getLexema() + "\"");
@@ -661,6 +794,7 @@ public class Parser {
 					Exp4();
 			}
 		}
+		return noExp4;
 	}
 
 	public void Exp4Linha() {
@@ -718,8 +852,8 @@ public class Parser {
 		if (token.getCodigo().equals(Tag.KW_VOID) || token.getCodigo().equals(Tag.KW_STRING)
 				|| token.getCodigo().equals(Tag.KW_BOOLEAN) || token.getCodigo().equals(Tag.KW_INTEGER)
 				|| token.getCodigo().equals(Tag.KW_DOUBLE)) {
-			TipoPrimitivo();
-			ID();
+			No noTipoPrimitivo = TipoPrimitivo();
+			ID(noTipoPrimitivo);
 			if (!eat(Tag.KW_PONTOVIRGULA))
 				sinalizaErroSintatico("Esperado \"bool, integer, String, double, void\"; encontrado \""
 						+ this.token.getLexema() + "\"");
@@ -766,8 +900,8 @@ public class Parser {
 		if (token.getCodigo().equals(Tag.KW_VOID) || token.getCodigo().equals(Tag.KW_STRING)
 				|| token.getCodigo().equals(Tag.KW_BOOLEAN) || token.getCodigo().equals(Tag.KW_INTEGER)
 				|| token.getCodigo().equals(Tag.KW_DOUBLE)) {
-			TipoPrimitivo();
-			ID();
+			No noTipoPrimitivo = TipoPrimitivo();
+			ID(noTipoPrimitivo);
 		} else {
 			// synch Arg
 			if (token.getCodigo().equals(Tag.KW_VIRGULA) || token.getCodigo().equals(Tag.KW_FECHAPAR)) {
@@ -794,19 +928,37 @@ public class Parser {
 		}
 	}
 
-	public void TipoPrimitivo() {
-		if (!eat(Tag.KW_BOOLEAN) && !eat(Tag.KW_INTEGER) && !eat(Tag.KW_STRING) && !eat(Tag.KW_DOUBLE)
-				&& !eat(Tag.KW_VOID)) {
+	public No TipoPrimitivo() {
+		No noTipoPrimitivo = new No();
+		
+		if (eat(Tag.KW_BOOLEAN)) {
+			noTipoPrimitivo.setTipo(Tag.LOGICO);
+			return noTipoPrimitivo;
+		}else if (eat(Tag.KW_INTEGER)) {
+			noTipoPrimitivo.setTipo(Tag.NUMERICO);
+			return noTipoPrimitivo;
+		}else if (eat(Tag.KW_STRING)) {
+			noTipoPrimitivo.setTipo(Tag.TEXTO);
+			return noTipoPrimitivo;
+		}else if (eat(Tag.KW_DOUBLE)) {
+			noTipoPrimitivo.setTipo(Tag.NUMERICO);
+			return noTipoPrimitivo;
+		}else if (eat(Tag.KW_VOID)) {
+			noTipoPrimitivo.setTipo(Tag.VAZIO);
+			return noTipoPrimitivo;
+		}else {
+			
 			// Synch TipoPrimitivo
 			if (token.getCodigo().equals(Tag.ID)) {
 				sinalizaErroSintatico("Esperado \"bool, integer, String, double, void\"; encontrado \""
 						+ this.token.getLexema() + "\"");
-				return;
+				return noTipoPrimitivo;
 			} else {
 				skip("Esperado \"bool, integer, String, double, void\"; encontrado \"" + this.token.getLexema() + "\"");
 				if (!token.getCodigo().equals(Tag.EOF))
 					TipoPrimitivo();
 			}
 		}
+		return noTipoPrimitivo;
 	}
 }

@@ -57,4 +57,11 @@ public class Tag {
 
     // Numeros
     public static final String NUM = "NUM";
+    
+    //
+    public static final String VAZIO = "VAZIO";
+    public static final String LOGICO = "LOGICO";
+    public static final String ERRO = "ERRO";
+    public static final String NUMERICO = "NUMERICO";
+    public static final String TEXTO = "TEXTO";
 }
