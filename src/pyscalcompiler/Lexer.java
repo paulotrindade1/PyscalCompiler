@@ -37,6 +37,10 @@ public class Lexer {
         }
     }
 
+    public Ts getTs() {
+        return this.ts;
+    }
+
     public void apresentaErroLexico(String message) {
         System.out.println("[Erro lexico]: " + message);
     }
@@ -71,7 +75,7 @@ public class Lexer {
         if (this.ts.getToken(lexema) == null) {
             ts.addToken(lexema, token);
         } else {
-            token.setCodigo(this.ts.getToken(lexema).getCodigo());
+            token.setCodigo(this.ts.getToken(lexema).codigo);
         }
 
         lastToken = token;
@@ -144,9 +148,10 @@ public class Lexer {
                     } else if (c == '-') {
                         Token token;
                         lexema += c;
-                        if (this.lastToken.getCodigo().equals(Tag.NUM)
-                                || this.lastToken.getCodigo().equals(Tag.KW_FECHAPAR)
-                                || this.lastToken.getCodigo().equals(Tag.ID)) {
+                        if (this.lastToken.getCodigo().equals(Tag.INTEGER)
+                            || this.lastToken.getCodigo().equals(Tag.DOUBLE)
+                            || this.lastToken.getCodigo().equals(Tag.KW_FECHAPAR)
+                            || this.lastToken.getCodigo().equals(Tag.ID)) {
                             token = retornaToken(Tag.OP_SUBTRACAO, lexema, line, col);
                         } else {
                             token = retornaToken(Tag.OP_NEGATIVO, lexema, line, col);
@@ -211,7 +216,7 @@ public class Lexer {
                         state = 4;
                     } else {
                         retornarPonteiro(c);
-                        Token token = retornaToken(Tag.NUM, lexema, line, col);
+                        Token token = retornaToken(Tag.INTEGER, lexema, line, col);
                         return token;
                     }
                     break;
@@ -221,7 +226,7 @@ public class Lexer {
                         lexema += c;
                     } else {
                         retornarPonteiro(c);
-                        Token token = retornaToken(Tag.NUM, lexema, line, col);
+                        Token token = retornaToken(Tag.DOUBLE, lexema, line, col);
                         return token;
                     }
                     break;
@@ -286,7 +291,7 @@ public class Lexer {
                             return null;
                         } else {
                             lexema += c;
-                            Token token = retornaToken(Tag.KW_STRING, lexema, line, col);
+                            Token token = retornaToken(Tag.STRING, lexema, line, col);
                             return token;
                         }
                     } else if (c == '\uffff') {
@@ -299,6 +304,7 @@ public class Lexer {
                     } else {
                         lexema += c;
                     }
+
             }
         }
     }

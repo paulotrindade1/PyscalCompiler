@@ -18,6 +18,14 @@ public class Ts {
     public void addToken(String lexema, Token token) {
         ts.put(lexema, token);
     }
+
+	public String getTipo(String lexema) {
+		return ts.get(lexema).getTipo();
+	}
+
+    public void setTipo(String lexema, String tipo) {
+		ts.get(lexema).setTipo(tipo);
+	}
     
     public void printTS() {
         for(Map.Entry<String, Token> entry : ts.entrySet()) {

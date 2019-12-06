@@ -2,16 +2,18 @@ package pyscalcompiler;
 
 public class Token {
 
-    private String codigo;
-    private String lexema;
-    private int linha;
-    private int coluna;
+    String codigo;
+    String lexema;
+    int linha;
+    int coluna;
+    String tipo;
 
     public Token(String codigo, String lexema, int linha, int coluna) {
         this.codigo = codigo;
         this.lexema = lexema;
         this.linha = linha;
         this.coluna = coluna;
+        this.tipo = Tag.TIPO_VAZIO;
     }
 
     public String getCodigo() {
@@ -28,6 +30,14 @@ public class Token {
 
     public int getColuna() {
         return coluna;
+    }
+
+    public String getTipo() {
+        return this.tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
     }
 
     public void setCodigo(String codigo) {

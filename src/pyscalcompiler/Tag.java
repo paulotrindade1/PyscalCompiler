@@ -52,16 +52,18 @@ public class Tag {
     public static final String OP_AND = "OP_AND";
     public static final String OP_OR = "OP_OR";
 
-    // Identificador
     public static final String ID = "ID";
 
-    // Numeros
-    public static final String NUM = "NUM";
-    
-    //
-    public static final String VAZIO = "VAZIO";
-    public static final String LOGICO = "LOGICO";
-    public static final String ERRO = "ERRO";
-    public static final String NUMERICO = "NUMERICO";
-    public static final String TEXTO = "TEXTO";
+    public static final String INTEGER = "INTEGER";
+    public static final String DOUBLE = "DOUBLE";
+    public static final String STRING = "STRING";
+
+    //Tipos ID's
+    public static final String TIPO_VAZIO   = "TIPO_VAZIO";
+    public static final String TIPO_LOGICO  = "TIPO_LOGICO";
+    public static final String TIPO_INT     = "TIPO_INT";
+    public static final String TIPO_DOUBLE  = "TIPO_DOUBLE";
+    public static final String TIPO_STRING  = "TIPO_STRING";
+    public static final String TIPO_NUMERICO  = "TIPO_NUMERICO";
+    public static final String TIPO_ERRO    = "TIPO_ERRO";
 }
